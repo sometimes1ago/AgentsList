@@ -11,7 +11,7 @@ namespace AgentsList
     class Database
     {
         private static readonly string ConnStr = @"Data Source=DESKTOP-Q8AEUVR\SQLEXPRESS; Initial Catalog = AgentsList; Integrated Security=true";
-        public static DataSet ds;
+        private static DataSet ds;
         private static SqlDataAdapter sqlad;
         private static SqlCommand comnd;
 
@@ -31,20 +31,23 @@ namespace AgentsList
                 sqlad = new SqlDataAdapter(QueryString, ConnStr);
                 ds = new DataSet();
 
-                if (Params != null)
+                if (!string.IsNullOrEmpty(QueryString) && !string.IsNullOrWhiteSpace(QueryString))
                 {
-                    for (int i = 0; i < Params.Count; i++)
+                    if (Params != null)
                     {
-                        comnd.Parameters.AddWithValue($@"@{i}", Params[i]);
-                    }
+                        for (int i = 0; i < Params.Count; i++)
+                        {
+                            comnd.Parameters.AddWithValue($@"@{i}", Params[i]);
+                        }
 
-                    sqlad.SelectCommand = comnd;
-                    sqlad.SelectCommand.ExecuteNonQuery();
-                }
-                else
-                {
-                    sqlad.SelectCommand = comnd;
-                    sqlad.SelectCommand.ExecuteNonQuery();
+                        sqlad.SelectCommand = comnd;
+                        sqlad.SelectCommand.ExecuteNonQuery();
+                    }
+                    else
+                    {
+                        sqlad.SelectCommand = comnd;
+                        sqlad.SelectCommand.ExecuteNonQuery();
+                    }
                 }
 
                 sqlad.Fill(ds);
@@ -53,7 +56,12 @@ namespace AgentsList
             }
         }
 
-        public static void ExecuteProcedure(string ProcedureName, List<string> ProcedureParameters = null)
+        /// <summary>
+        /// Метод выполнения хранимой процедуры
+        /// </summary>
+        /// <param name="ProcedureName">Имя хранимой процедуры</param>
+        /// <param name="ProcedureParameters">Параметры для выполнения процедуры. Может быть пустым</param>
+        public static async void ExecuteProcedure(string ProcedureName, List<string> ProcedureParameters = null)
         {
             using (SqlConnection sqlconn = new SqlConnection(ConnStr))
             {
@@ -66,7 +74,7 @@ namespace AgentsList
                 string BuildedQuery;
 
                 //Проверка на пустоты и null значение имени процедуры
-                if (!ProcedureName.Equals("") && ProcedureName != null)
+                if (!string.IsNullOrEmpty(ProcedureName))
                 {
                     //Проверка на количество параметров процедуры
                     if (ProcedureParameters.Count > 0)
@@ -79,14 +87,13 @@ namespace AgentsList
 
                         //Удаление последней запятой из запроса, которая появляется из-за цикла
                         BuildedQuery = PreBuildedQuery.Substring(0, PreBuildedQuery.Length - 1);
-
                     }
                     else
                     {
                         BuildedQuery = PreBuildedQuery;
                     }
 
-                   comnd = new SqlCommand(BuildedQuery, sqlconn);
+                    comnd = new SqlCommand(BuildedQuery, sqlconn);
 
                     //Передача параметров в подготовленный запрос
                     for (int i = 0; i < ProcedureParameters.Count; i++)
@@ -95,7 +102,7 @@ namespace AgentsList
                     }
 
                     //Выполнение запроса и закрытие соединения к БД
-                    comnd.ExecuteNonQuery();
+                    await comnd.ExecuteNonQueryAsync();
                     sqlconn.Close();
                 }
                 else
@@ -107,15 +114,21 @@ namespace AgentsList
             }
         }
 
-        public static void Insert(string TableName, List<string> FieldNames, List<string> FieldValues)
+        /// <summary>
+        /// Метод вставки значений в таблицу
+        /// </summary>
+        /// <param name="TableName">Имя таблицы</param>
+        /// <param name="FieldNames">Названия полей для вставки</param>
+        /// <param name="FieldValues">Значения для полей</param>
+        public static async void Insert(string TableName, List<string> FieldNames, List<string> FieldValues)
         {
             using (SqlConnection sqlconn = new SqlConnection(ConnStr))
             {
                 //Проверка на пустоту и ненулевое количество Имен полей
-                if (!FieldNames.Equals(null) && FieldNames.Count > 0)
+                if (!string.IsNullOrEmpty(FieldNames.ToString()))
                 {
                     //Проверка на пустоту и ненулевое количество Значений полей
-                    if (!FieldValues.Equals(null) && FieldValues.Count > 0)
+                    if (!string.IsNullOrEmpty(FieldValues.ToString()))
                     {
                         //Проверка на совпадение количества элементов списков Имен полей и Значений полей
                         if (FieldNames.Count.Equals(FieldValues.Count))
@@ -157,7 +170,7 @@ namespace AgentsList
                             }
 
                             //Выполнение запроса и закрытие соединения с БД
-                            comnd.ExecuteNonQuery();
+                            await comnd.ExecuteNonQueryAsync();
                             sqlconn.Close();
                         }
                         else
@@ -177,11 +190,44 @@ namespace AgentsList
             }
         }
 
-        public void Update(string TableName, string Setter, string Value, string Condition)
+        /// <summary>
+        /// Метод обновления записей в таблице
+        /// </summary>
+        /// <param name="TableName">Имя таблицы</param>
+        /// <param name="Setter">Поле, значение которого необходимо обновить</param>
+        /// <param name="Value">Значение, которое необходимо присвоить</param>
+        /// <param name="Condition">Условие по которому значение присваивается конкретному полю</param>
+        public static async void Update(string TableName, string Setter, string Value, string Condition = "ID = 1")
         {
-            throw new System.NotImplementedException();
+            using (SqlConnection sqlconn = new SqlConnection(ConnStr))
+            {
+                if (!string.IsNullOrEmpty(TableName))
+                {
+                    if (!string.IsNullOrEmpty(Setter))
+                    {
+                        if (!string.IsNullOrEmpty(Value))
+                        {
+                            sqlconn.Open();
+                            string Query = $@"update {TableName} set {Setter} = '{Value}' where {Condition}";
+                            comnd = new SqlCommand(Query, sqlconn);
+                            await comnd.ExecuteNonQueryAsync();
+                            sqlconn.Close();
+                        }
+                        else
+                        {
+                            throw new ArgumentException("Значение не может быть пустым!");
+                        }
+                    }
+                    else
+                    {
+                        throw new ArgumentException("Сеттер не может быть пустым!");
+                    }
+                }
+                else
+                {
+                    throw new ArgumentException("Имя таблицы не может быть пустым!");
+                }
+            }
         }
-
-
     }
 }

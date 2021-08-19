@@ -10,16 +10,16 @@ using System.Windows.Forms;
 
 namespace AgentsList
 {
-    public partial class Start : Form
+    public partial class Auth : Form
     {
-        public Start()
+        public Auth()
         {
             InitializeComponent();
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void Auth_Load(object sender, EventArgs e)
         {
-            Database.Insert(null, null, new List<string>() { "1", "2" });
+            
         }
     }
 }
