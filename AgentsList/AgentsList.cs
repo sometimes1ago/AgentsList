@@ -26,6 +26,7 @@ namespace AgentsList
         {
             int CurrentY = 0;
             int YOffset = 10;
+
             for (int i = 0; i < AgentsCollection.Count; i++)
             {
                 AgentsCollection[i].Location = new Point(0, CurrentY);

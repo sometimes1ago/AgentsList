@@ -66,6 +66,7 @@
     <Compile Include="Auth.Designer.cs">
       <DependentUpon>Auth.cs</DependentUpon>
     </Compile>
+    <Compile Include="Service.cs" />
     <Compile Include="Validator.cs" />
     <Compile Include="Database.cs" />
     <Compile Include="Program.cs" />

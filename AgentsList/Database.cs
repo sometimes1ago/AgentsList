@@ -52,7 +52,7 @@ namespace AgentsList
 
                 sqlad.Fill(ds);
                 sqlconn.Close();
-                return ds.Tables[0];
+                return ds;
             }
         }
 
@@ -68,7 +68,7 @@ namespace AgentsList
                 sqlconn.Open();
 
                 //Шаблон запроса
-                string PreBuildedQuery = $@"execute {ProcedureName} ";
+                string PreBuildedQuery = $@"execute '{ProcedureName}' ";
                 
                 //Готовый запрос
                 string BuildedQuery;
