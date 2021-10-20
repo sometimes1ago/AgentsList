@@ -61,7 +61,7 @@ namespace AgentsList
         /// </summary>
         /// <param name="ProcedureName">Имя хранимой процедуры</param>
         /// <param name="ProcedureParameters">Параметры для выполнения процедуры. Может быть пустым</param>
-        public static async void ExecuteProcedure(string ProcedureName, List<string> ProcedureParameters = null)
+        public static void ExecuteProcedure(string ProcedureName, List<string> ProcedureParameters = null)
         {
             using (SqlConnection sqlconn = new SqlConnection(ConnStr))
             {
@@ -102,7 +102,7 @@ namespace AgentsList
                     }
 
                     //Выполнение запроса и закрытие соединения к БД
-                    await comnd.ExecuteNonQueryAsync();
+                    comnd.ExecuteNonQueryAsync();
                     sqlconn.Close();
                 }
                 else
@@ -120,7 +120,7 @@ namespace AgentsList
         /// <param name="TableName">Имя таблицы</param>
         /// <param name="FieldNames">Названия полей для вставки</param>
         /// <param name="FieldValues">Значения для полей</param>
-        public static async void Insert(string TableName, List<string> FieldNames, List<string> FieldValues)
+        public static void Insert(string TableName, List<string> FieldNames, List<string> FieldValues)
         {
             using (SqlConnection sqlconn = new SqlConnection(ConnStr))
             {
@@ -170,7 +170,7 @@ namespace AgentsList
                             }
 
                             //Выполнение запроса и закрытие соединения с БД
-                            await comnd.ExecuteNonQueryAsync();
+                            comnd.ExecuteNonQueryAsync();
                             sqlconn.Close();
                         }
                         else
@@ -197,7 +197,7 @@ namespace AgentsList
         /// <param name="Setter">Поле, значение которого необходимо обновить</param>
         /// <param name="Value">Значение, которое необходимо присвоить</param>
         /// <param name="Condition">Условие по которому значение присваивается конкретному полю</param>
-        public static async void Update(string TableName, string Setter, string Value, string Condition = "ID = 1")
+        public static void Update(string TableName, string Setter, string Value, string Condition = "ID = 1")
         {
             using (SqlConnection sqlconn = new SqlConnection(ConnStr))
             {
@@ -210,7 +210,7 @@ namespace AgentsList
                             sqlconn.Open();
                             string Query = $@"update {TableName} set {Setter} = '{Value}' where {Condition}";
                             comnd = new SqlCommand(Query, sqlconn);
-                            await comnd.ExecuteNonQueryAsync();
+                            comnd.ExecuteNonQueryAsync();
                             sqlconn.Close();
                         }
                         else
